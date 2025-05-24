@@ -62,6 +62,6 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(){
         SecurityContextHolder.clearContext(); // clear localstorage from client device (frontend)
-        return ResponseEntity.ok("User Logged Out.");
+        return ResponseEntity.ok("User Logged Out. Hurray");
     }
 }
