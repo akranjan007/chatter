@@ -1,0 +1,72 @@
+# ========================
+# Compiled class files
+/target/
+/**/target/
+/**/build/
+
+# ========================
+# Logs
+*.log
+
+# ========================
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# ========================
+# IDE files
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ========================
+# Maven specific
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+
+# ========================
+# Gradle specific
+.gradle/
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ========================
+# Node (React frontend)
+chatterfrontend/node_modules/
+chatterfrontend/build/
+chatterfrontend/.env
+
+# ========================
+# JAR/WAR/EAR files
+*.jar
+*.war
+*.ear
+
+# ========================
+# Database and config files
+*.db
+*.sqlite
+*.h2.db
+
+# Ignore environment-specific Spring Boot config
+application.properties
+application.yml
+application-dev.properties
+application-dev.yml
+
+# ========================
+# Misc
+.env
