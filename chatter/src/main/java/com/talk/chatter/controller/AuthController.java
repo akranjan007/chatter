@@ -60,8 +60,17 @@ public class AuthController {
         }
     }
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(){
-        SecurityContextHolder.clearContext(); // clear localstorage from client device (frontend)
-        return ResponseEntity.ok("User Logged Out. Hurray");
+    public ResponseEntity<Map<String, Object>> logout(){
+        Map<String, Object> response = new HashMap<>();
+        try{
+            SecurityContextHolder.clearContext(); //Also clear localstorage from client device (frontend)
+            response.put("success", true);
+            response.put("message", "Logout Successful!");
+            return ResponseEntity.ok(response);
+        }catch(Exception e){
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 }
