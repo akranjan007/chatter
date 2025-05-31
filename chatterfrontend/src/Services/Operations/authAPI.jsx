@@ -5,7 +5,7 @@ import { apiConnector } from "../apiConnector";
 import { endpoints } from "../api";
 import { setUser } from "../../Slice/profileSlice";
 import { jsx } from "react/jsx-runtime";
-const { SIGNUP_API, LOGIN_API } = endpoints;
+const { SIGNUP_API, LOGIN_API, LOGOUT_API } = endpoints;
 
 
 
@@ -56,13 +56,38 @@ export function login(formData, navigate){
             const tok = response.data.token;
             dispatch(setToken(tok));
             toast.success("Login Successful!");
+            console.log(response.data.userObj);
             dispatch(setUser(response.data.userObj));
             localStorage.setItem("token", JSON.stringify(response.data.token));
-            localStorage.setItem("user", JSON.stringify(response.data.userObj));
+            localStorage.setItem("userObj", JSON.stringify(response.data.userObj));
             navigate("/dashboard/myprofile");
         }catch(error){
             console.log("LOGIN_API ERROR.............. ", error);
             toast.error("Login Failed!");
+        }
+        dispatch(setLoading(false));
+        toast.dismiss(toastId);
+    }
+}
+
+export function logout(navigate){
+    return async(dispatch) => {
+        const toastId = toast.loading("Processing");
+        dispatch(setLoading(true));
+        try{
+            //backend call for logout
+            const response = await apiConnector("POST", LOGOUT_API);
+            console.log("LOGOUT_API_RESPONSE.........", response);
+            if(!response.data.success){
+                throw new Error(response.data.message);
+            }
+            dispatch(setToken(null));
+            dispatch(setUser(null));
+            localStorage.clear();
+            navigate("/login");
+        }catch(error){
+            console.log("LOGOUT_API_ERROR........", error);
+            toast.error("Logout Failed");
         }
         dispatch(setLoading(false));
         toast.dismiss(toastId);
