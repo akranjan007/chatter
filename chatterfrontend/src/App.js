@@ -6,6 +6,8 @@ import Signup from './Pages/Signup';
 import OpenRoute from './Utils/OpenRoute';
 import Login from './Pages/Login';
 import Navbar from './Component/Common/Navbar';
+import PrivateRoute from './Utils/PrivateRoute';
+import Chats from './Pages/Chats';
 
 function App() {
   return (
@@ -25,6 +27,11 @@ function App() {
         <Route 
           path='/login'
           element={<OpenRoute><Login/></OpenRoute>}
+        />
+
+        <Route
+          path='/chats'
+          element={<PrivateRoute><Chats/></PrivateRoute>}
         />
       </Routes>
     </div>

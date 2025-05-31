@@ -11,3 +11,45 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  background-color: #001822;
+  color: #C5C7D4;
+  height: 50px;
+}
+
+#logoutButton, .loginButton{
+  background-color: #537988;
+  color: #C5C7D4;
+  border: 0;
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+a{
+  text-decoration: none;
+  color: inherit;
+}
+#profilemenu{
+  display: flex;
+  color: #C5C7D4;
+  position: relative;
+}
+#profileDiv{
+  cursor: pointer;
+}
+#dropdown{
+  position:absolute;
+  background-color: #063544;
+  border-radius: 2px;
+  top: 40px;
+  right:290px;
+  z-index: 10;
+  width: 160px;
+  height: 100px;
+}
+#chat{
+  color: black;
+}

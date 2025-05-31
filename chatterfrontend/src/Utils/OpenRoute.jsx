@@ -5,7 +5,7 @@ const OpenRoute = ({children}) => {
     const token = useSelector((state)=>state.auth.token);
     if(token===null) return children;
     else{
-        return <Navigate to="/dashboard/myprofile"/>
+        return <Navigate to="/chats"/>
     }
 };
 

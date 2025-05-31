@@ -60,7 +60,7 @@ export function login(formData, navigate){
             dispatch(setUser(response.data.userObj));
             localStorage.setItem("token", JSON.stringify(response.data.token));
             localStorage.setItem("userObj", JSON.stringify(response.data.userObj));
-            navigate("/dashboard/myprofile");
+            navigate("/chats");
         }catch(error){
             console.log("LOGIN_API ERROR.............. ", error);
             toast.error("Login Failed!");

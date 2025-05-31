@@ -12,12 +12,12 @@ const Navbar = () => {
     }, [user]);
 
     return (
-        <div >
-            <p>Chatter</p>
-            <p>Chats</p>
+        <div class="nav">
+            <Link to={"/"}><p>Chatter</p></Link>
+            <Link to={"/chats"}><p>Chats</p></Link>
             {
                 loginState ? (<ProfileMenu/>) :
-                (<Link to={"/login"}><p>Login</p></Link>)
+                (<Link to={"/login"}><p className="loginButton">Login</p></Link>)
             }
         </div>
     )
