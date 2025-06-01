@@ -5,6 +5,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
 }
 
 code {
@@ -51,5 +54,23 @@ a{
   height: 100px;
 }
 #chat{
-  color: black;
+  display: flex;
+  justify-content: space-between;
+  height: 100vh;
+}
+#chatArea{
+  background-color: #063544;
+  width: 80%;
+}
+#chatTileMaster{
+  width: 20%;
+  background-color: #355b6a;
+  cursor: pointer;
+}
+#chatTile{
+  background-color: #537988;
+  border: none;
+  border-radius: 4px;
+  margin: 10px;
+  height: 40px;
 }
