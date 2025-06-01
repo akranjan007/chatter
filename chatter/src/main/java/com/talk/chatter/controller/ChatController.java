@@ -42,18 +42,31 @@ public class ChatController {
     }
 
     @PostMapping("/history")
-    public ResponseEntity<List<MessageDTO>> getChat(@RequestBody ChatRequestor request){
-        String principalUser = SecurityContextHolder.getContext().getAuthentication().getName();
-        String user1 = request.getUser1();
-        String user2 = request.getUser2();
-        System.out.println(principalUser + " " + user1 + " " + user2);
-        if(!principalUser.equals(user1) && !principalUser.equals(user2)){
-            return ResponseEntity.status(403).build();
+    public ResponseEntity<Map<String, Object>> getChat(@RequestBody ChatRequestor request){
+        Map<String, Object> response = new HashMap<>();
+        try{
+            String principalUser = SecurityContextHolder.getContext().getAuthentication().getName();
+            String user1 = request.getUser1();
+            String user2 = request.getUser2();
+            System.out.println(principalUser + " " + user1 + " " + user2);
+            if(!principalUser.equals(user1) && !principalUser.equals(user2)){
+                response.put("success", false);
+                response.put("message", "Unauthorized access to chat.");
+                return ResponseEntity.status(403).body(response);
+            }
+            List<Message>  messages = messageRepo.getChatHistory(user1, user2);
+            List<MessageDTO> message = messages.stream()
+                    .map(m -> new MessageDTO(m.getSenderId(), m.getReceiverId(), m.getMessageText(), m.getTimestamp()))
+                    .collect(Collectors.toList());
+            response.put("success", true);
+            response.put("data", message);
+            response.put("message", "Chat history fetched.");
+            return ResponseEntity.ok(response);
+        }catch(Exception e){
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
-        List<Message>  messages = messageRepo.getChatHistory(user1, user2);
-        List<MessageDTO> response = messages.stream()
-                .map(m -> new MessageDTO(m.getSenderId(), m.getReceiverId(), m.getMessageText(), m.getTimestamp()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
     }
 }
