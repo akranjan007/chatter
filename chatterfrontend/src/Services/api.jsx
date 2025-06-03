@@ -5,5 +5,6 @@ export const endpoints = {
   LOGIN_API: BASE_URL + "auth/login",
   LOGOUT_API: BASE_URL + "auth/logout",
   CONNECTIONS_API: BASE_URL + "chat/connections",
-  CHAT_API: BASE_URL + "chat/history",
+  CHAT_API_ALL: BASE_URL + "chat/history/all",
+  CHAT_API_SINGLE: BASE_URL + "chat/history/single"
 };

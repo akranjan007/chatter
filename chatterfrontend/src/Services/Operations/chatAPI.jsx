@@ -3,7 +3,8 @@ import { apiConnector } from "../apiConnector";
 import {endpoints} from "../api";
 import { setConnections } from "../../Slice/profileSlice";
 import toast from "react-hot-toast";
-const { CONNECTIONS_API, CHAT_API } = endpoints;
+import { setChats } from "../../Slice/chatSlice";
+const { CONNECTIONS_API, CHAT_API_ALL } = endpoints;
 
 export function fetchConnections(email, token, navigate){
     const senderEmail = email;
@@ -30,21 +31,20 @@ export function fetchConnections(email, token, navigate){
     }
 }
 
-export function fetchChat(senderEmail, receiverEmail, token, navigate){
-    const user1 = senderEmail;
-    const user2 = receiverEmail;
+export function fetchAllChat(senderEmail, token, navigate){
     return async(dispatch) => {
         const toastId = toast.loading("Loading......");
         dispatch(setLoading(true));
         try{
-            const response = await apiConnector("POST", CHAT_API, { user1, user2 }, {
+            const response = await apiConnector("POST", CHAT_API_ALL, { senderEmail }, {
                 Authorization: `Bearer ${token}`
             });
-            console.log("CHAT_API RESPONSE.......... ", response);
+            console.log("CHAT_API_ALL RESPONSE.......... ", response);
             if(!response.data.success) throw new Error(response.data.message);
+            dispatch(setChats(response.data.data));
 
         }catch(error){
-            console.log("CHAT_API ERROR.........", error.message);
+            console.log("CHAT_API_ALL ERROR.........", error.message);
             toast.error("Error while fetching Chat")
         }
         dispatch(setLoading(false));

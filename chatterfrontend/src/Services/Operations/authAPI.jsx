@@ -5,6 +5,7 @@ import { apiConnector } from "../apiConnector";
 import { endpoints } from "../api";
 import { setUser } from "../../Slice/profileSlice";
 import { jsx } from "react/jsx-runtime";
+import { setCurrentUser } from "../../Slice/chatSlice";
 const { SIGNUP_API, LOGIN_API, LOGOUT_API } = endpoints;
 
 
@@ -58,6 +59,7 @@ export function login(formData, navigate){
             toast.success("Login Successful!");
             console.log(response.data.userObj);
             dispatch(setUser(response.data.userObj));
+            dispatch(setCurrentUser(response.data.userObj.email));
             localStorage.setItem("token", JSON.stringify(response.data.token));
             localStorage.setItem("userObj", JSON.stringify(response.data.userObj));
             navigate("/chats");
