@@ -41,7 +41,36 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/history")
+    @PostMapping("/history/all")
+    public ResponseEntity<Map<String, Object>> getAllChat(@RequestBody Map<String, String> request){
+        Map<String, Object> response = new HashMap<>();
+        try{
+            String principalUser = SecurityContextHolder.getContext().getAuthentication().getName();
+            String user = request.get("senderEmail");
+            if(!principalUser.equals(user)){
+                response.put("success", false);
+                response.put("message", "Unauthorized access to chat.");
+                return  ResponseEntity.status(403).body(response);
+            }
+            List<Message> messages = messageRepo.getAllChatHistory(user);
+            Map<String, List<MessageDTO>> groupedMessages = messages.stream()
+                    .map(mes -> new MessageDTO(mes.getSenderId(), mes.getReceiverId(), mes.getMessageText(), mes.getTimestamp()))
+                    .collect(Collectors.groupingBy(m ->{
+                        return m.getSenderId().equals(user) ? m.getReceiverId() : m.getSenderId();
+                    }));
+            response.put("success", true);
+            response.put("data", groupedMessages);
+            response.put("message", "All chats fetched.");
+            return ResponseEntity.ok(response);
+        }catch(Exception e){
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping("/history/single")
     public ResponseEntity<Map<String, Object>> getChat(@RequestBody ChatRequestor request){
         Map<String, Object> response = new HashMap<>();
         try{

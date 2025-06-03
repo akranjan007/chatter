@@ -17,4 +17,11 @@ public interface MessageRepo extends JpaRepository<Message, Long> {
                     "ORDER BY m.timestamp ASC"
     )
     List<Message> getChatHistory(@Param("user1") String user1, @Param("user2") String user2);
+
+    @Query(
+        "SELECT m FROM Message m WHERE "+
+                "m.senderId = :user OR m.receiverId = :user " +
+                "ORDER BY m.timestamp ASC"
+    )
+    List<Message> getAllChatHistory(@Param("user") String user);
 }
