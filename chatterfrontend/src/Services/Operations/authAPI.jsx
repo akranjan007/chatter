@@ -59,7 +59,9 @@ export function login(formData, navigate){
             toast.success("Login Successful!");
             console.log(response.data.userObj);
             dispatch(setUser(response.data.userObj));
+            //console.log("EMAIL TO SET AS CURRENT USER: ", response.data.userObj.email);
             dispatch(setCurrentUser(response.data.userObj.email));
+            localStorage.setItem("currentUser", JSON.stringify(response.data.userObj.email));
             localStorage.setItem("token", JSON.stringify(response.data.token));
             localStorage.setItem("userObj", JSON.stringify(response.data.userObj));
             navigate("/chats");

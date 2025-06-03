@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    currentUser: null,
-    chats:{}
+    currentUser: localStorage.getItem("currentUser") ? JSON.parse(localStorage.getItem("currentUser")): null,
+    chats:{},
+    chatUser:null
 }
 
 const chatSlice = createSlice({
@@ -22,8 +23,11 @@ const chatSlice = createSlice({
             }
             state.chats[receiverId].push(message);
         },
+        setChatUser(state, value){
+            state.chatUser = value.payload;
+        },
     }
 });
 
-export const { setCurrentUser, setChats, addNewMessage } = chatSlice.actions;
+export const { setCurrentUser, setChats, addNewMessage, setChatUser } = chatSlice.actions;
 export default chatSlice.reducer;

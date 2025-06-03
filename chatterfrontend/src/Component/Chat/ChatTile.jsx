@@ -1,6 +1,7 @@
 import react from "react";
 import { connect, useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setChatUser } from "../../Slice/chatSlice";
 
 const ChatTile = ({connection, chat}) => {
     const dispatch = useDispatch();
@@ -9,7 +10,7 @@ const ChatTile = ({connection, chat}) => {
     const token = useSelector((state)=>state.auth.token);
     //console.log(chat[chat.length - 1].message);
     function openChatHandler(){
-        
+        dispatch(setChatUser(connection));
     }
     return (
         <div id="chatTile" onClick={openChatHandler}>
