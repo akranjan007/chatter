@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,9 +47,15 @@ public class ChatWebSocketHandler implements WebSocketHandler {
                 WebSocketSession receiverSession = sessions.get(username);
                 if(receiverSession!=null && receiverSession.isOpen()){
                     for(Queue q:unsent){
-                        String messageText = q.getMessage();
-                        String senderId = q.getSenderId();
-                        receiverSession.sendMessage(new TextMessage(messageText));
+                        Map<String, String> messageObj = new HashMap<>();
+                        messageObj.put("senderId", q.getSenderId());
+                        messageObj.put("receiverId", q.getReceiverId());
+                        messageObj.put("messageText", q.getMessage());
+                        messageObj.put("timestamp", String.valueOf(q.getTimestamp()));
+
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String messageString = objectMapper.writeValueAsString(messageObj);
+                        receiverSession.sendMessage(new TextMessage(messageString));
                     }
                     queueService.deleteSentUnsentMessage(username);
                 }
@@ -83,9 +90,10 @@ public class ChatWebSocketHandler implements WebSocketHandler {
             System.out.println("Receiver doesn't exists "+ receiverEmail);
             return;
         }
+        LocalDateTime timestamp = LocalDateTime.now();
         connectionService.connectionCheck(senderEmail, receiverEmail);
-        messageService.saveMessage(senderEmail, receiverEmail, messageText);
-        queueService.queueMessage(senderEmail, receiverEmail, messageText, sessions);
+        messageService.saveMessage(senderEmail, receiverEmail, messageText, timestamp);
+        queueService.queueMessage(senderEmail, receiverEmail, messageText, timestamp, sessions);
 
     }
 

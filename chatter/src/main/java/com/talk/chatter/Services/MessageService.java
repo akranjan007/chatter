@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 public class MessageService {
     @Autowired private MessageRepo messageRepo;
 
-    public void saveMessage(String senderEmail, String receiverEmail, String messageText){
+    public void saveMessage(String senderEmail, String receiverEmail, String messageText, LocalDateTime timestamp){
         Message messageItem = new Message();
         messageItem.setMessageText(messageText);
         messageItem.setReceiverId(receiverEmail);
         messageItem.setSenderId(senderEmail);
-        messageItem.setTimestamp(LocalDateTime.now());
+        messageItem.setTimestamp(timestamp);
         messageRepo.save(messageItem);
     }
 }

@@ -1,5 +1,6 @@
 package com.talk.chatter.Services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talk.chatter.Entities.Queue;
 import com.talk.chatter.Repository.QueueRepo;
 import jakarta.transaction.Transactional;
@@ -10,16 +11,26 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class QueueService {
     @Autowired private QueueRepo queueRepo;
 
-    public void queueMessage(String senderEmail, String receiverEmail, String messageText, ConcurrentHashMap<String, WebSocketSession> sessions) throws IOException {
+    public void queueMessage(String senderEmail, String receiverEmail, String messageText, LocalDateTime timestamp, ConcurrentHashMap<String, WebSocketSession> sessions) throws IOException {
         WebSocketSession receiverSession = sessions.get(receiverEmail);
         if(receiverSession!=null && receiverSession.isOpen()){
-            receiverSession.sendMessage(new TextMessage(messageText));
+            Map<String, String> messageObj = new HashMap<>();
+            messageObj.put("senderId", senderEmail);
+            messageObj.put("receiverId", receiverEmail);
+            messageObj.put("messageText", messageText);
+            messageObj.put("timestamp", String.valueOf(timestamp));
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String messageString = objectMapper.writeValueAsString(messageObj);
+            receiverSession.sendMessage(new TextMessage(messageString));
             System.out.println("Sent message to : "+receiverEmail);
         }
         else{
