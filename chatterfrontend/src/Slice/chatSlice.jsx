@@ -16,12 +16,23 @@ const chatSlice = createSlice({
         setChats(state, value){
             state.chats = value.payload;
         },
-        addNewMessage(state, value){
-            const { receiverId, message } = value.payload;
-            if(!state.chats[receiverId]){
-                state.chats[receiverId] = [];
+        addMessageToChat: (state, action) => {
+            const { senderEmail, receiverEmail, message, timestamp } = action.payload;
+
+            const chatKey = senderEmail === state.currentUser
+                ? receiverEmail
+                : senderEmail;
+
+            if (!state.chats[chatKey]) {
+                state.chats[chatKey] = [];
             }
-            state.chats[receiverId].push(message);
+
+            state.chats[chatKey].push({
+                message,
+                senderId: senderEmail,
+                receiverId: receiverEmail,
+                timestamp: timestamp || new Date().toISOString()
+            });
         },
         setChatUser(state, value){
             state.chatUser = value.payload;
@@ -29,5 +40,5 @@ const chatSlice = createSlice({
     }
 });
 
-export const { setCurrentUser, setChats, addNewMessage, setChatUser } = chatSlice.actions;
+export const { setCurrentUser, setChats, setChatUser, addMessageToChat} = chatSlice.actions;
 export default chatSlice.reducer;

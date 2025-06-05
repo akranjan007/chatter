@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { BsSend } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { addMessageToChat } from "../../Slice/chatSlice";
 
 const ChatArea = () => {
     const dispatch = useDispatch();
@@ -15,22 +16,7 @@ const ChatArea = () => {
         reset
     } = useForm();
     const [message, setMessage] = useState([]);
-    if(!chatUser || !chatUser.email || !chats || !chats[chatUser.email]){
-        return (<div>Select a chat.</div>)
-    }
-    const currentChatHistory = chats[chatUser.email];
-    const onSubmit = (data) => {
-        if (!data.message.trim()) return;
-        console.log(data.message);
-        const message = data.message;
-        socket.current.send(JSON.stringify({
-            receiverId:chatUser.email,
-            messageText:message,
-        }));
-        setInput("");
-        reset();
-    };
-
+    
     const socket = useRef(null);
 
     useEffect(() => {
@@ -41,10 +27,21 @@ const ChatArea = () => {
         };
 
         socket.current.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            console.log("Message received : ", message);
-            setMessages((prev) => [...prev, message]);
+            //console.log("WS Message:", typeof event.data);  // <== LOOK HERE
+            try {
+                const messageObj = JSON.parse(event.data);
+                console.log("Message Object.... ", messageObj);
+                dispatch(addMessageToChat({
+                    senderEmail: messageObj.senderId,
+                    receiverEmail: messageObj.receiverId,
+                    message: messageObj.messageText,
+                    timestamp: messageObj.timestamp
+                }));
+            } catch (err) {
+                console.error("Failed to parse message:", err);
+            }
         };
+
 
         socket.current.onclose = () => {
             console.log("WebSocket disconnected");
@@ -53,8 +50,34 @@ const ChatArea = () => {
         return () => socket.current.close();
     }, [token]);
 
-    
+    const currentChatHistory = useMemo(() => {
+        if (!chatUser || !chatUser.email || !chats) return [];
+        return chats[chatUser.email] || [];
+    }, [chatUser, chats]);
 
+    if(!chatUser || !chatUser.email || !chats || !chats[chatUser.email]){
+        return (<div>Select a chat.</div>)
+    }
+
+    
+    const onSubmit = (data) => {
+        if (!data.message.trim()) return;
+        console.log(data.message);
+        const message = data.message;
+        dispatch(addMessageToChat({
+                    senderEmail: currentUser,
+                    receiverEmail: chatUser.email,
+                    message: message,
+                    timestamp: new Date().toISOString,
+                }));
+        socket.current.send(JSON.stringify({
+            receiverId:chatUser.email,
+            messageText:message
+        }));
+        //setInput("");
+        reset();
+    };
+    console.log("chat ", currentChatHistory);
     //console.log(currentUser);
     return (
         <div id="chatArea">
