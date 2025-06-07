@@ -18,7 +18,6 @@ const chatSlice = createSlice({
         },
         addMessageToChat: (state, action) => {
             const { senderEmail, receiverEmail, message, timestamp } = action.payload;
-
             const chatKey = senderEmail === state.currentUser
                 ? receiverEmail
                 : senderEmail;

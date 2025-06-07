@@ -48,14 +48,14 @@ const ChatArea = () => {
         };
 
         return () => socket.current.close();
-    }, [token]);
+    }, [token, chatUser]);
 
     const currentChatHistory = useMemo(() => {
         if (!chatUser || !chatUser.email || !chats) return [];
         return chats[chatUser.email] || [];
     }, [chatUser, chats]);
 
-    if(!chatUser || !chatUser.email || !chats || !chats[chatUser.email]){
+    if(!chatUser || !chatUser.email ){
         return (<div>Select a chat.</div>)
     }
 
@@ -68,7 +68,7 @@ const ChatArea = () => {
                     senderEmail: currentUser,
                     receiverEmail: chatUser.email,
                     message: message,
-                    timestamp: new Date().toISOString,
+                    timestamp: new Date().toLocalString,
                 }));
         socket.current.send(JSON.stringify({
             receiverId:chatUser.email,
@@ -77,18 +77,21 @@ const ChatArea = () => {
         //setInput("");
         reset();
     };
-    console.log("chat ", currentChatHistory);
+    //console.log("chat ", currentChatHistory);
     //console.log(currentUser);
     return (
         <div id="chatArea">
             <div id="chatDisplayArea">
                 {
                 currentChatHistory!==null && currentChatHistory?.map((message, index)=>(
-                    <div key={index}>
-                    <span>{currentUser!==message.senderId ? ( message.senderId + ": ") : ("You: ")}</span>
-                    <span>{message.message}</span>
-                    <br/>
+                    <div key={index} className="message">
+                            <p className="message-sender">
+                            {currentUser !== message.senderId ? `${message.senderId}` : "You"}
+                            </p>
+                        <p className="message-text">{message.message}</p>
+                        <p className="message-time">{message.timestamp.toString().substring(0, 10) +' '+message.timestamp.toString().substring(11, 16)}</p>
                     </div>
+
                 ))
             }
             </div>
