@@ -64,11 +64,15 @@ const ChatArea = () => {
         if (!data.message.trim()) return;
         console.log(data.message);
         const message = data.message;
+        const now = new Date();
+        const offsetMs = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes in milliseconds
+        const istDate = new Date(now.getTime() + offsetMs);
+        const currTime = istDate.toISOString();
         dispatch(addMessageToChat({
                     senderEmail: currentUser,
                     receiverEmail: chatUser.email,
                     message: message,
-                    timestamp: new Date().toLocalString,
+                    timestamp: currTime,
                 }));
         socket.current.send(JSON.stringify({
             receiverId:chatUser.email,
