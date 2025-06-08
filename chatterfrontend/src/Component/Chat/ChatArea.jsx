@@ -4,6 +4,7 @@ import { BsSend } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addMessageToChat } from "../../Slice/chatSlice";
+import { fetchConnections } from "../../Services/Operations/chatAPI";
 
 const ChatArea = () => {
     const dispatch = useDispatch();
@@ -25,7 +26,7 @@ const ChatArea = () => {
         socket.current.onopen = () => {
             console.log("WebSocket connected");
         };
-
+        const newFlag = false;
         socket.current.onmessage = (event) => {
             //console.log("WS Message:", typeof event.data);  // <== LOOK HERE
             try {
@@ -41,7 +42,7 @@ const ChatArea = () => {
                 console.error("Failed to parse message:", err);
             }
         };
-
+        dispatch(fetchConnections(currentUser, token, navigate));
 
         socket.current.onclose = () => {
             console.log("WebSocket disconnected");

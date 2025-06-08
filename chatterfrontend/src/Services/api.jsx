@@ -7,4 +7,5 @@ export const endpoints = {
   CONNECTIONS_API: BASE_URL + "chat/connections",
   CHAT_API_ALL: BASE_URL + "chat/history/all",
   CHAT_API_SINGLE: BASE_URL + "chat/history/single",
+  SEARCH_USER_API: BASE_URL + "search/user",
 };
