@@ -5,11 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addMessageToChat } from "../../Slice/chatSlice";
 import { fetchConnections } from "../../Services/Operations/chatAPI";
+import { addConnections } from "../../Slice/profileSlice";
 
 const ChatArea = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const {currentUser, chatUser, chats} = useSelector((state)=>state.chat);
+    const { connections } = useSelector((state) => state.profile);
     const {token} = useSelector((state)=>state.auth);
     const {
         register,
@@ -26,12 +28,25 @@ const ChatArea = () => {
         socket.current.onopen = () => {
             console.log("WebSocket connected");
         };
-        const newFlag = false;
+
         socket.current.onmessage = (event) => {
-            //console.log("WS Message:", typeof event.data);  // <== LOOK HERE
             try {
                 const messageObj = JSON.parse(event.data);
-                console.log("Message Object.... ", messageObj);
+                const chatKey = messageObj.senderId === currentUser ? messageObj.receiverId : messageObj.senderId;
+
+                // Add connection only if it's not already in list
+                const exists = connections.some((conn) => conn.email === chatKey);
+
+                if (!exists) {
+                    dispatch(addConnections({
+                        email: chatKey,
+                        firstName: chatUser.firstName, // fill if available
+                        lastName: chatUser.lastName,
+                        userId: chatUser.userId,
+                        userName: chatUser.userName | ""
+                    }));
+                }
+
                 dispatch(addMessageToChat({
                     senderEmail: messageObj.senderId,
                     receiverEmail: messageObj.receiverId,
@@ -42,14 +57,14 @@ const ChatArea = () => {
                 console.error("Failed to parse message:", err);
             }
         };
-        dispatch(fetchConnections(currentUser, token, navigate));
 
         socket.current.onclose = () => {
             console.log("WebSocket disconnected");
         };
 
         return () => socket.current.close();
-    }, [token, chatUser]);
+    }, [token, currentUser]); // ❗ remove chatUser dependency
+
 
     const currentChatHistory = useMemo(() => {
         if (!chatUser || !chatUser.email || !chats) return [];
@@ -63,25 +78,36 @@ const ChatArea = () => {
     
     const onSubmit = (data) => {
         if (!data.message.trim()) return;
-        console.log(data.message);
         const message = data.message;
         const now = new Date();
-        const offsetMs = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes in milliseconds
+        const offsetMs = 5.5 * 60 * 60 * 1000;
         const istDate = new Date(now.getTime() + offsetMs);
         const currTime = istDate.toISOString();
+
         dispatch(addMessageToChat({
-                    senderEmail: currentUser,
-                    receiverEmail: chatUser.email,
-                    message: message,
-                    timestamp: currTime,
-                }));
-        socket.current.send(JSON.stringify({
-            receiverId:chatUser.email,
-            messageText:message
+            senderEmail: currentUser,
+            receiverEmail: chatUser.email,
+            message,
+            timestamp: currTime
         }));
-        //setInput("");
+
+        // Add receiver to connection list if not already present
+        dispatch(addConnections({
+            email: chatUser.email,
+            firstName: chatUser.firstName,
+            lastName: chatUser.lastName,
+            userId: chatUser.userId,
+            userName: chatUser.userName
+        }));
+
+        socket.current.send(JSON.stringify({
+            receiverId: chatUser.email,
+            messageText: message
+        }));
+
         reset();
     };
+
     //console.log("chat ", currentChatHistory);
     //console.log(currentUser);
     return (
