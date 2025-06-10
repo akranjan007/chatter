@@ -8,4 +8,5 @@ export const endpoints = {
   CHAT_API_ALL: BASE_URL + "chat/history/all",
   CHAT_API_SINGLE: BASE_URL + "chat/history/single",
   SEARCH_USER_API: BASE_URL + "search/user",
+  USER_PROFILE_API : BASE_URL + "search/user-profile",
 };

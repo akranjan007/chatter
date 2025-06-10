@@ -36,6 +36,7 @@ const ChatArea = () => {
                 const exists = connectionsRef.current.some((conn) => conn.email === chatKey);
 
                 if (!exists) {
+                    const response = dispatch(fetchProfile(chatKey, token));
                     dispatch(addConnections({
                         email: chatKey
                     }));

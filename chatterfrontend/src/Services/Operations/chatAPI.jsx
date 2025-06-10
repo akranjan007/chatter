@@ -4,7 +4,7 @@ import {endpoints} from "../api";
 import { setConnections } from "../../Slice/profileSlice";
 import toast from "react-hot-toast";
 import { setChats, setChatUser } from "../../Slice/chatSlice";
-const { CONNECTIONS_API, CHAT_API_ALL, SEARCH_USER_API } = endpoints;
+const { CONNECTIONS_API, CHAT_API_ALL, SEARCH_USER_API, USER_PROFILE_API } = endpoints;
 
 export function fetchConnections(email, token, navigate){
     const senderEmail = email;
@@ -66,6 +66,24 @@ export function searchUser(searchUser, token, navigate){
         } catch(error) {
             console.log("SEARCH_USER_API ERROR....... ", error.message);
             toast.error("User Not Found / Error while searching");
+        }
+        dispatch(setLoading(false));
+        toast.dismiss(toastId);
+    }
+}
+
+export function fetchProfile(emailId, token){
+    return async(dispatch) => {
+        dispatch(setLoading(true));
+        const toastId = toast.loading("Loading...");
+        try{
+            const response = await apiConnector("POST", USER_PROFILE_API, {emailId}, {Authorization:`Bearer ${token}`});
+            console.log("USER_PROFILE_API RESPONSE........... ", response);
+            if(!response.data.success){ throw new Error(response.data.message)};
+            return response;
+        } catch(error){
+            console.log("USER_PROFILE_API ERROR.......... ", error.message);
+            toast.error("Error while fetching profile");
         }
         dispatch(setLoading(false));
         toast.dismiss(toastId);
