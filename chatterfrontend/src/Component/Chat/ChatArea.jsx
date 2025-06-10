@@ -4,7 +4,7 @@ import { BsSend } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addMessageToChat } from "../../Slice/chatSlice";
-import { fetchConnections } from "../../Services/Operations/chatAPI";
+import { fetchConnections, fetchProfile } from "../../Services/Operations/chatAPI";
 import { addConnections } from "../../Slice/profileSlice";
 
 const ChatArea = () => {
@@ -28,29 +28,37 @@ const ChatArea = () => {
         };
 
         socket.current.onmessage = (event) => {
-            try {
-                const messageObj = JSON.parse(event.data);
-                const chatKey = messageObj.senderId === currentUser ? messageObj.receiverId : messageObj.senderId;
+            const handleMessage = async () => {
+                try {
+                    const messageObj = JSON.parse(event.data);
+                    const chatKey = messageObj.senderId === currentUser ? messageObj.receiverId : messageObj.senderId;
 
-                // Add connection only if it's not already in list
-                const exists = connectionsRef.current.some((conn) => conn.email === chatKey);
+                    // Add connection only if it's not already in list
+                    const exists = connectionsRef.current.some((conn) => conn.email === chatKey);
 
-                if (!exists) {
-                    const response = dispatch(fetchProfile(chatKey, token));
-                    dispatch(addConnections({
-                        email: chatKey
+                    if (!exists) {
+                        const response = await dispatch(fetchProfile(chatKey, token));
+                        dispatch(addConnections({
+                            email: chatKey,
+                            firstName: response.firstName || "",
+                            lastName: response.lastName || "",
+                            userId: response.userId || "",
+                            userName: response.userName || "",
+                        }));
+                    }
+
+                    dispatch(addMessageToChat({
+                        senderEmail: messageObj.senderId,
+                        receiverEmail: messageObj.receiverId,
+                        message: messageObj.messageText,
+                        timestamp: messageObj.timestamp
                     }));
+                } catch (err) {
+                    console.error("Failed to parse message:", err);
                 }
+            };
 
-                dispatch(addMessageToChat({
-                    senderEmail: messageObj.senderId,
-                    receiverEmail: messageObj.receiverId,
-                    message: messageObj.messageText,
-                    timestamp: messageObj.timestamp
-                }));
-            } catch (err) {
-                console.error("Failed to parse message:", err);
-            }
+            handleMessage(); // invoke async handler
         };
 
         socket.current.onclose = () => {

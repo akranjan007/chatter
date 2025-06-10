@@ -72,20 +72,22 @@ export function searchUser(searchUser, token, navigate){
     }
 }
 
-export function fetchProfile(emailId, token){
-    return async(dispatch) => {
-        dispatch(setLoading(true));
-        const toastId = toast.loading("Loading...");
-        try{
-            const response = await apiConnector("POST", USER_PROFILE_API, {emailId}, {Authorization:`Bearer ${token}`});
-            console.log("USER_PROFILE_API RESPONSE........... ", response);
-            if(!response.data.success){ throw new Error(response.data.message)};
-            return response;
-        } catch(error){
-            console.log("USER_PROFILE_API ERROR.......... ", error.message);
-            toast.error("Error while fetching profile");
+export function fetchProfile(emailId, token) {
+    return async () => {
+        try {
+            const response = await apiConnector(
+                "POST",
+                SEARCH_USER_API,
+                { searchUser: emailId },
+                { Authorization: `Bearer ${token}` }
+            );
+            if (!response.data.success) {
+                throw new Error(response.data.message);
+            }
+            return response.data.data;
+        } catch (error) {
+            console.error("SEARCH_USER_API (PROFILE) ERROR:", error.message);
+            return null;
         }
-        dispatch(setLoading(false));
-        toast.dismiss(toastId);
-    }
+    };
 }
