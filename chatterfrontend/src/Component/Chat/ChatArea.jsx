@@ -4,20 +4,21 @@ import { BsSend } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addMessageToChat } from "../../Slice/chatSlice";
+import { fetchConnections, fetchProfile } from "../../Services/Operations/chatAPI";
+import { addConnections } from "../../Slice/profileSlice";
 
 const ChatArea = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const {currentUser, chatUser, chats} = useSelector((state)=>state.chat);
+    const { connections } = useSelector((state) => state.profile);
     const {token} = useSelector((state)=>state.auth);
-    const {
-        register,
-        handleSubmit,
-        reset
-    } = useForm();
-    const [message, setMessage] = useState([]);
     
     const socket = useRef(null);
+    const connectionsRef = useRef(connections);
+    useEffect(()=>{
+        connectionsRef.current = connections;
+    }, [connections])
 
     useEffect(() => {
         socket.current = new WebSocket(`ws://localhost:8080/api/v1/ws-chat?token=${token}`);
@@ -27,60 +28,94 @@ const ChatArea = () => {
         };
 
         socket.current.onmessage = (event) => {
-            //console.log("WS Message:", typeof event.data);  // <== LOOK HERE
-            try {
-                const messageObj = JSON.parse(event.data);
-                console.log("Message Object.... ", messageObj);
-                dispatch(addMessageToChat({
-                    senderEmail: messageObj.senderId,
-                    receiverEmail: messageObj.receiverId,
-                    message: messageObj.messageText,
-                    timestamp: messageObj.timestamp
-                }));
-            } catch (err) {
-                console.error("Failed to parse message:", err);
-            }
-        };
+            const handleMessage = async () => {
+                try {
+                    const messageObj = JSON.parse(event.data);
+                    const chatKey = messageObj.senderId === currentUser ? messageObj.receiverId : messageObj.senderId;
 
+                    // Add connection only if it's not already in list
+                    const exists = connectionsRef.current.some((conn) => conn.email === chatKey);
+
+                    if (!exists) {
+                        const response = await dispatch(fetchProfile(chatKey, token));
+                        dispatch(addConnections({
+                            email: chatKey,
+                            firstName: response.firstName || "",
+                            lastName: response.lastName || "",
+                            userId: response.userId || "",
+                            userName: response.userName || "",
+                        }));
+                    }
+
+                    dispatch(addMessageToChat({
+                        senderEmail: messageObj.senderId,
+                        receiverEmail: messageObj.receiverId,
+                        message: messageObj.messageText,
+                        timestamp: messageObj.timestamp
+                    }));
+                } catch (err) {
+                    console.error("Failed to parse message:", err);
+                }
+            };
+
+            handleMessage(); // invoke async handler
+        };
 
         socket.current.onclose = () => {
             console.log("WebSocket disconnected");
         };
 
         return () => socket.current.close();
-    }, [token, chatUser]);
+    }, [token]); // ❗ remove chatUser dependency
+
 
     const currentChatHistory = useMemo(() => {
         if (!chatUser || !chatUser.email || !chats) return [];
         return chats[chatUser.email] || [];
     }, [chatUser, chats]);
 
+    const {
+        register,
+        handleSubmit,
+        reset
+    } = useForm();
+
     if(!chatUser || !chatUser.email ){
         return (<div>Select a chat.</div>)
     }
-
     
     const onSubmit = (data) => {
         if (!data.message.trim()) return;
-        console.log(data.message);
         const message = data.message;
         const now = new Date();
-        const offsetMs = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes in milliseconds
+        const offsetMs = 5.5 * 60 * 60 * 1000;
         const istDate = new Date(now.getTime() + offsetMs);
         const currTime = istDate.toISOString();
+
         dispatch(addMessageToChat({
-                    senderEmail: currentUser,
-                    receiverEmail: chatUser.email,
-                    message: message,
-                    timestamp: currTime,
-                }));
-        socket.current.send(JSON.stringify({
-            receiverId:chatUser.email,
-            messageText:message
+            senderEmail: currentUser,
+            receiverEmail: chatUser.email,
+            message,
+            timestamp: currTime
         }));
-        //setInput("");
+
+        // Add receiver to connection list if not already present
+        dispatch(addConnections({
+            email: chatUser.email,
+            firstName: chatUser.firstName || "",
+            lastName: chatUser.lastName || "",
+            userId: chatUser.userId || "",
+            userName: chatUser.userName || "",
+        }));
+
+        socket.current.send(JSON.stringify({
+            receiverId: chatUser.email,
+            messageText: message
+        }));
+
         reset();
     };
+
     //console.log("chat ", currentChatHistory);
     //console.log(currentUser);
     return (

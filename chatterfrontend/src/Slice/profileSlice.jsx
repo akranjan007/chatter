@@ -19,8 +19,15 @@ const profileSlice = createSlice({
         setConnections(state, value){
             state.connections = value.payload;
         },
+        addConnections: (state, action) => {
+            const exists = state.connections.some(conn => conn.email === action.payload.email);
+            if (!exists) {
+                state.connections.push(action.payload);
+            }
+        }
+
     }
 });
 
-export const {setUser, setLoading, setConnections} = profileSlice.actions;
+export const {setUser, setLoading, setConnections, addConnections} = profileSlice.actions;
 export default profileSlice.reducer;

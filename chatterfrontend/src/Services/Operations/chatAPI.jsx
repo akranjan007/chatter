@@ -3,8 +3,8 @@ import { apiConnector } from "../apiConnector";
 import {endpoints} from "../api";
 import { setConnections } from "../../Slice/profileSlice";
 import toast from "react-hot-toast";
-import { setChats } from "../../Slice/chatSlice";
-const { CONNECTIONS_API, CHAT_API_ALL } = endpoints;
+import { setChats, setChatUser } from "../../Slice/chatSlice";
+const { CONNECTIONS_API, CHAT_API_ALL, SEARCH_USER_API, USER_PROFILE_API } = endpoints;
 
 export function fetchConnections(email, token, navigate){
     const senderEmail = email;
@@ -50,4 +50,44 @@ export function fetchAllChat(senderEmail, token, navigate){
         dispatch(setLoading(false));
         toast.dismiss(toastId);
     }
+}
+
+export function searchUser(searchUser, token, navigate){
+    return async(dispatch) => {
+        dispatch(setLoading(true));
+        const toastId = toast.loading("Loading...");
+        try{
+            const response = await apiConnector("POST", SEARCH_USER_API, {searchUser}, {Authorization: `Bearer ${token}`});
+            console.log("SEARCH_USER_API......... ", response);
+            if(!response.data.success){
+                throw new Error(response.data.message);
+            }
+            dispatch(setChatUser(response.data.data));
+        } catch(error) {
+            console.log("SEARCH_USER_API ERROR....... ", error.message);
+            toast.error("User Not Found / Error while searching");
+        }
+        dispatch(setLoading(false));
+        toast.dismiss(toastId);
+    }
+}
+
+export function fetchProfile(emailId, token) {
+    return async () => {
+        try {
+            const response = await apiConnector(
+                "POST",
+                SEARCH_USER_API,
+                { searchUser: emailId },
+                { Authorization: `Bearer ${token}` }
+            );
+            if (!response.data.success) {
+                throw new Error(response.data.message);
+            }
+            return response.data.data;
+        } catch (error) {
+            console.error("SEARCH_USER_API (PROFILE) ERROR:", error.message);
+            return null;
+        }
+    };
 }
