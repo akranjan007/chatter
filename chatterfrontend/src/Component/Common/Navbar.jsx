@@ -39,8 +39,7 @@ const Navbar = () => {
                         <button type="submit"><FaSearch/></button>
                     </form>
                 )
-            }
-            {
+            }            {
                 loginState ? (<ProfileMenu/>) :
                 (<Link to={"/login"}><p className="loginButton">Login</p></Link>)
             }

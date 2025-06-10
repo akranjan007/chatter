@@ -13,14 +13,12 @@ const ChatArea = () => {
     const {currentUser, chatUser, chats} = useSelector((state)=>state.chat);
     const { connections } = useSelector((state) => state.profile);
     const {token} = useSelector((state)=>state.auth);
-    const {
-        register,
-        handleSubmit,
-        reset
-    } = useForm();
-    const [message, setMessage] = useState([]);
     
     const socket = useRef(null);
+    const connectionsRef = useRef(connections);
+    useEffect(()=>{
+        connectionsRef.current = connections;
+    }, [connections])
 
     useEffect(() => {
         socket.current = new WebSocket(`ws://localhost:8080/api/v1/ws-chat?token=${token}`);
@@ -35,15 +33,11 @@ const ChatArea = () => {
                 const chatKey = messageObj.senderId === currentUser ? messageObj.receiverId : messageObj.senderId;
 
                 // Add connection only if it's not already in list
-                const exists = connections.some((conn) => conn.email === chatKey);
+                const exists = connectionsRef.current.some((conn) => conn.email === chatKey);
 
                 if (!exists) {
                     dispatch(addConnections({
-                        email: chatKey,
-                        firstName: chatUser.firstName, // fill if available
-                        lastName: chatUser.lastName,
-                        userId: chatUser.userId,
-                        userName: chatUser.userName | ""
+                        email: chatKey
                     }));
                 }
 
@@ -63,7 +57,7 @@ const ChatArea = () => {
         };
 
         return () => socket.current.close();
-    }, [token, currentUser]); // ❗ remove chatUser dependency
+    }, [token]); // ❗ remove chatUser dependency
 
 
     const currentChatHistory = useMemo(() => {
@@ -71,10 +65,15 @@ const ChatArea = () => {
         return chats[chatUser.email] || [];
     }, [chatUser, chats]);
 
+    const {
+        register,
+        handleSubmit,
+        reset
+    } = useForm();
+
     if(!chatUser || !chatUser.email ){
         return (<div>Select a chat.</div>)
     }
-
     
     const onSubmit = (data) => {
         if (!data.message.trim()) return;
@@ -94,10 +93,10 @@ const ChatArea = () => {
         // Add receiver to connection list if not already present
         dispatch(addConnections({
             email: chatUser.email,
-            firstName: chatUser.firstName,
-            lastName: chatUser.lastName,
-            userId: chatUser.userId,
-            userName: chatUser.userName
+            firstName: chatUser.firstName || "",
+            lastName: chatUser.lastName || "",
+            userId: chatUser.userId || "",
+            userName: chatUser.userName || "",
         }));
 
         socket.current.send(JSON.stringify({
