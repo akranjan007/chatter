@@ -8,10 +8,12 @@ import Login from './Pages/Login';
 import Navbar from './Component/Common/Navbar';
 import PrivateRoute from './Utils/PrivateRoute';
 import Chats from './Pages/Chats';
+import { WebSocketProvider } from './Context/WebSocket/WebSocketProvider_v2';
 
 function App() {
   return (
-    <div className="App">
+    <WebSocketProvider className="App">
+      <div className='App'>
       {/*Navbar */}
       <Navbar/>
       <Routes>
@@ -34,7 +36,8 @@ function App() {
           element={<PrivateRoute><Chats/></PrivateRoute>}
         />
       </Routes>
-    </div>
+      </div>
+    </WebSocketProvider>
   );
 }
 

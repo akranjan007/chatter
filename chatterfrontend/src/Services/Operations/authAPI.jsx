@@ -6,7 +6,7 @@ import { endpoints } from "../api";
 import { setUser } from "../../Slice/profileSlice";
 import { jsx } from "react/jsx-runtime";
 import { setCurrentUser } from "../../Slice/chatSlice";
-const { SIGNUP_API, LOGIN_API, LOGOUT_API } = endpoints;
+const { SIGNUP_API, LOGIN_API, LOGOUT_API, CHECK_API } = endpoints;
 
 
 
@@ -96,4 +96,30 @@ export function logout(navigate){
         dispatch(setLoading(false));
         toast.dismiss(toastId);
     }
+}
+
+export function tokenCheck(token, shouldRedirect = true) {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector("POST", CHECK_API, {}, {
+        Authorization: `Bearer ${token}`,
+      });
+
+      if (response.status === 200) {
+        return true;
+      } else {
+        throw new Error("Invalid response");
+      }
+    } catch (error) {
+      console.error("Token check failed:", error.message);
+      localStorage.clear();
+      dispatch(setToken(null));
+      dispatch(setUser(null));
+
+      if (shouldRedirect) {
+        toast.error("Session Expired. Logging Out...");
+      }
+      return false;
+    }
+  };
 }
