@@ -30,6 +30,18 @@ public class JwtFilter extends OncePerRequestFilter {
         String email = null;
 
         if(authHeader!=null && authHeader.startsWith("Bearer ")){
+            /*try{
+                if(jwtService.isTokenExpired(token)){
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("TokenExpired");
+                    return;
+                }
+
+            } catch(Exception e){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Malformed Token");
+                return;
+            }*/
             token = authHeader.substring(7);
             email = jwtService.extractUserName(token);
         }

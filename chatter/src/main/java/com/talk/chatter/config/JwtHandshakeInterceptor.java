@@ -3,10 +3,12 @@ package com.talk.chatter.config;
 import com.talk.chatter.Entities.Users;
 import com.talk.chatter.Repository.UserRepository;
 import com.talk.chatter.Services.JwtService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -35,30 +37,56 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             System.out.println(">>> Token received: " + token);
 
             if (token != null) {
-                String username = jwtService.extractUserName(token);
-                System.out.println(">>> Username extracted: " + username);
+                try {
+                    // Check token expiration
+                    if (jwtService.isTokenExpired(token)) {
+                        System.out.println(">>> Token is expired");
 
-                if (username != null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    Optional<Users> optionUser = userRepo.findByEmail(username);
-                    Users user = optionUser.get();
-                    if (jwtService.validateToken(token, userDetails)) {
-                        System.out.println(">>> Token validated successfully for: " + username);
-                        attributes.put("username", username);
-                        attributes.put("userId", user.getUserId());
-                        return true;
-                    } else {
-                        System.out.println(">>> Token validation failed");
+                        if (response instanceof ServletServerHttpResponse servletResponse) {
+                            HttpServletResponse servletHttpResp = servletResponse.getServletResponse();
+                            servletHttpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            servletHttpResp.getWriter().write("TokenExpired");
+                            servletHttpResp.getWriter().flush();
+                            servletHttpResp.getWriter().close();
+                        }
+
+                        return false;
                     }
-                } else {
-                    System.out.println(">>> Username extraction failed");
+
+                    String username = jwtService.extractUserName(token);
+                    System.out.println(">>> Username extracted: " + username);
+
+                    if (username != null) {
+                        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                        Optional<Users> optionUser = userRepo.findByEmail(username);
+
+                        if (optionUser.isPresent() && jwtService.validateToken(token, userDetails)) {
+                            System.out.println(">>> Token validated successfully for: " + username);
+                            attributes.put("username", username);
+                            attributes.put("userId", optionUser.get().getUserId());
+                            return true;
+                        } else {
+                            System.out.println(">>> User not found or token invalid");
+                        }
+                    } else {
+                        System.out.println(">>> Username extraction failed");
+                    }
+                } catch (Exception e) {
+                    System.out.println(">>> Token parsing/validation error: " + e.getMessage());
+                    if (response instanceof ServletServerHttpResponse servletResponse) {
+                        HttpServletResponse servletHttpResp = servletResponse.getServletResponse();
+                        servletHttpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        servletHttpResp.getWriter().write("MalformedToken");
+                        servletHttpResp.getWriter().flush();
+                        servletHttpResp.getWriter().close();
+                    }
+                    return false;
                 }
             } else {
                 System.out.println(">>> Token is null");
             }
-        } else {
-            System.out.println(">>> Not a ServletServerHttpRequest");
         }
+
         return false;
     }
 
