@@ -24,9 +24,14 @@ public class ChatWebSocketHandler implements WebSocketHandler {
     @Autowired private ConnectionsRepo connectionsRepo;
     @Autowired private ConnectionService connectionService;
     @Autowired private MessageService messageService;
+    @Autowired private StatusService statusService;
 
     //Updated: Support multiple sessions per user
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<WebSocketSession>> sessions = new ConcurrentHashMap<>();
+
+    public ConcurrentHashMap<String, CopyOnWriteArrayList<WebSocketSession>> getSessions(){
+        return sessions;
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -60,7 +65,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
                     }
                 }
 
-                queueService.deleteSentUnsentMessage(username); // ✅ Keep if messages are per user
+                queueService.deleteSentUnsentMessage(username); // Keep if messages are per user
             } else {
                 System.out.println("No new Message for " + username);
             }
@@ -131,7 +136,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         String username = (String) session.getAttributes().get("username");
 
         if (username != null) {
-            // ✅ Updated: Remove only the disconnected session
+            //Updated: Remove only the disconnected session
             CopyOnWriteArrayList<WebSocketSession> userSessions = sessions.get(username);
             if (userSessions != null) {
                 userSessions.remove(session);
