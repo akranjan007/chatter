@@ -2,16 +2,22 @@ import react, { useEffect } from "react";
 import { connect, useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setChatUser } from "../../Slice/chatSlice";
+import { checkStatus } from "../../Services/Operations/chatAPI";
+import { useOnlineStatus } from "../../Utils/CustomHooks/UserStatusHook";
+import { useWebSocket } from "../../Context/WebSocket/WebSocketProvider_v2";
 
 const ChatTile = ({connection, chat}) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const senderEmail = useSelector((state)=>state.profile.user.email);
-    const {currentUser} = useSelector((state)=>state.chat);
+    const {currentUser, chatUser} = useSelector((state)=>state.chat);
     const token = useSelector((state)=>state.auth.token);
     //console.log(chat[chat.length - 1].message);
+    
     function openChatHandler(){
+        //dispatch(checkStatus(token, chatUser.email, dispatch));
         dispatch(setChatUser(connection));
+        
     }
     //console.log("debug.", chat);
     return (

@@ -12,6 +12,11 @@ const Chats = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     //console.log(connections);
+    //let connectionUnique = [...new Set(connections)];
+    const connectionUnique = connections.filter(
+        (conn, index, self) =>
+        index === self.findIndex((c) => c.email === conn.email)
+    );
     useEffect(()=>{
         if(user && user.email){
             dispatch(fetchConnections(user.email, token, navigate));
@@ -22,7 +27,7 @@ const Chats = () => {
         <div id="chat">
             <div id="chatTileMaster">
                 {
-                    connections.map((connection, index) => (
+                    connectionUnique.map((connection, index) => (
                         <ChatTile key={index} connection={connection} chat={chats[connection.email]}/>
                     ))
                 }

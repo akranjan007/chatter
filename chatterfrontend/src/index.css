@@ -175,4 +175,20 @@ a{
   box-shadow: 0 2px #1c1c1c;
 }
 
-
+#chatUserHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2e2e2e;
+  color: #f1f1f1;
+  border: none;
+  outline: none;
+  padding: 0 20px;
+  font-size: 1rem;
+}
+#name{
+  font-weight: bolder;
+}
+#status{
+  font-size: 0.75rem;
+}

@@ -3,8 +3,8 @@ import { apiConnector } from "../apiConnector";
 import {endpoints} from "../api";
 import { setConnections } from "../../Slice/profileSlice";
 import toast from "react-hot-toast";
-import { setChats, setChatUser } from "../../Slice/chatSlice";
-const { CONNECTIONS_API, CHAT_API_ALL, SEARCH_USER_API, USER_PROFILE_API } = endpoints;
+import { setChats, setChatUser, setStatus } from "../../Slice/chatSlice";
+const { CONNECTIONS_API, CHAT_API_ALL, SEARCH_USER_API, USER_PROFILE_API, STATUS_CHECK_API, CONCURRENT_CHECK_API } = endpoints;
 
 export function fetchConnections(email, token, navigate){
     const senderEmail = email;
@@ -90,4 +90,46 @@ export function fetchProfile(emailId, token) {
             return null;
         }
     };
+}
+
+export function checkStatus(token, emailId, dispatch){
+    return async () => {
+        try{
+            const response = await apiConnector(
+                "POST",
+                STATUS_CHECK_API,
+                { checkUser : emailId },
+                { Authorization: `Bearer ${token}`}
+            );
+            if(!response.data.success){
+                throw new Error(response.data.message);
+            }
+            //localStorage.setItem("status", JSON.stringify(response.data.status));
+            dispatch(setStatus(response.data.status));
+            return response.data.status;
+        } catch(error) {
+            console.error("STATUS_CHECK_API ERROR: ", error.message);
+            return null;
+        }
+    }
+}
+
+export async function fetchConcurrent(token){
+    return async () => {
+        try{
+            //const response = await apiConnector(
+            //    "POST", CONCURRENT_CHECK_API, { checkUser : emailId }, { Authorization: `Bearer ${token}` }
+            //);
+            const response = await apiConnector("POST", CONCURRENT_CHECK_API, {}, {
+                Authorization: `Bearer ${token}`,
+            });
+            if(!response.data.success){
+                throw new Error(response.data.message);
+            }
+            return response.data.data;
+        } catch(error){
+            console.error("CONCURRENT_CHECK_API ............. ", error.message);
+            return null;
+        }
+    }
 }

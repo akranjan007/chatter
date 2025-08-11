@@ -2,6 +2,8 @@ import react, { useContext, useEffect, useRef, useState, createContext } from "r
 import { useDispatch, useSelector } from "react-redux";
 import { tokenCheck } from "../../Services/Operations/authAPI";
 import { useNavigate } from "react-router-dom";
+import { useOnlineStatus } from "../../Utils/CustomHooks/UserStatusHook";
+import { fetchConcurrent } from "../../Services/Operations/chatAPI";
 
 export const WebSocketContext = createContext(null);
 
@@ -106,6 +108,13 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [token, dispatch, navigate]);
 
+  const {onlineUser, error} = useOnlineStatus(token);
+  /*useEffect(() => {
+  if (onlineUser) {
+    console.log("Concurrent session map:", onlineUser);
+  }
+}, [onlineUser]);*/
+
   //pass context values and state
   const value = {
     socket : socketRef.current,
@@ -119,7 +128,8 @@ export const WebSocketProvider = ({ children }) => {
         }
     },
     reconnect : () => connectWebSocket(true),
-    closeConnection
+    closeConnection,
+    concurrentSessions : onlineUser
   };
 
   return (

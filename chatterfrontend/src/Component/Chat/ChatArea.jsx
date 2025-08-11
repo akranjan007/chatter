@@ -14,13 +14,16 @@ const ChatArea = () => {
   const { connections } = useSelector((state) => state.profile);
   const { token } = useSelector((state) => state.auth);
   //const token = localStorage.getItem("token");
-  const { socket, isConnected } = useWebSocket();
+  const { socket, isConnected, concurrentSessions } = useWebSocket();
   const endOfChatRef = useRef(null);
-
+  //const status = "ONline";
+  
+  //console.log("session print", concurrentSessions);
   const currentUserRef = useRef(currentUser);
   const connectionsRef = useRef(connections);
   const chatUserRef = useRef(chatUser);
 
+  
   useEffect(() => {
     currentUserRef.current = currentUser;
     connectionsRef.current = connections;
@@ -121,6 +124,17 @@ const ChatArea = () => {
 
   return (
     <div id="chatArea">
+      <div id="chatUserHeader">
+        <p id="name">{chatUser.firstName}   {chatUser.lastName}</p>
+        <p id="status">
+          {chatUser?.email === currentUser
+            ? "Online"
+            : (Array.isArray(concurrentSessions) && concurrentSessions.includes(chatUser?.email)
+                ? "Online"
+                : "")
+          }
+        </p>
+      </div>
       <div id="chatDisplayArea">
         {currentChatHistory.map((message, index) => (
           <div key={index} className="message">

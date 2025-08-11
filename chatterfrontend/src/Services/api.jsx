@@ -10,4 +10,6 @@ export const endpoints = {
   SEARCH_USER_API: BASE_URL + "search/user",
   USER_PROFILE_API : BASE_URL + "search/user-profile",
   CHECK_API : BASE_URL + "auth/token-check",
+  STATUS_CHECK_API : BASE_URL + "search/status",
+  CONCURRENT_CHECK_API : BASE_URL + "search/concurrent"
 };
