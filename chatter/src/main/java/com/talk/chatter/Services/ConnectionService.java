@@ -36,4 +36,10 @@ public class ConnectionService {
             System.out.println("Connections started between "+user1.getEmail()+" and "+user2.getEmail());
         }
     }
+
+    public void updateLastUpdated(String senderEmail, String receiverEmail){
+        Long userAId = userRepo.findByEmail(senderEmail).get().getUserId();
+        Long userBId = userRepo.findByEmail(receiverEmail).get().getUserId();
+        connectionsRepo.updateLastUpdated(userAId, userBId);
+    }
 }

@@ -98,6 +98,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         LocalDateTime timestamp = LocalDateTime.now();
         connectionService.connectionCheck(senderEmail, receiverEmail);
         messageService.saveMessage(senderEmail, receiverEmail, messageText, timestamp);
+        connectionService.updateLastUpdated(senderEmail, receiverEmail);
 
         Map<String, String> messageObj = new HashMap<>();
         messageObj.put("senderId", senderEmail);

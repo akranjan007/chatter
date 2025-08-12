@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +34,15 @@ public class ChatController {
         if(!principalUserEmail.equals(userEmail)){
             return  ResponseEntity.status(403).build();
         }
-        List<Users> connection = connectionsRepo.findConnectedUsers(userEmail);
+        //List<Users> connection = connectionsRepo.findConnectedUsers(userEmail);
+        List<Object[]> connection = connectionsRepo.findConnectedUsersSortedByLastUpdated(userEmail);
+        System.out.println(connection);
+        List<Users> conn = connection.stream()
+                .sorted((Obj1, Obj2) -> ((LocalDateTime) Obj2[1]).compareTo((LocalDateTime) Obj1[1]))
+                .map(obj -> (Users) obj[0])
+                .toList();
         Map<String, Object> response = new HashMap<>();
-        response.put("data", connection);
+        response.put("data", conn);
         response.put("success", true);
         response.put("message", "Connection List Fetched.");
         return ResponseEntity.ok(response);
