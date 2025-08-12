@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { BsSend } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
@@ -136,17 +136,20 @@ const ChatArea = () => {
         </p>
       </div>
       <div id="chatDisplayArea">
-        {currentChatHistory.map((message, index) => (
-          <div key={index} className="message">
+        {currentChatHistory.map((message, index) => {
+          const messageSide = currentUser!==message.senderId ? "left" : "right";
+          return (
+          <div key={index} className={`message ${messageSide}`}>
             <p className="message-sender">
-              {currentUser !== message.senderId ? `${message.senderId}` : "You"}
+              {currentUser !== message.senderId ? `${chatUser.firstName} ${chatUser.lastName}` : "You"}
             </p>
             <p className="message-text">{message.message}</p>
             <p className="message-time">
               {message.timestamp.toString().substring(0, 10) + ' ' + message.timestamp.toString().substring(11, 16)}
             </p>
           </div>
-        ))}
+          );
+        })}
         <div ref={endOfChatRef}/>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} id="typingArea">
